@@ -3,78 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HanjaPass - 职场+HSK1速成</title>
+    <title>HanjaPass - 智慧中文学习</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Malgun Gothic', sans-serif; }
-        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .active-btn { background-color: #6366f1; box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
+        body { background: #1a1c1e; color: white; font-family: 'Malgun Gothic', sans-serif; }
+        .glass-card { background: #2a2d31; border: 1px solid #3f444c; transition: transform 0.2s; }
+        .glass-card:active { transform: scale(0.98); }
+        .btn-active { background: #6366f1; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); }
+        .speaker-btn { cursor: pointer; transition: color 0.2s; }
+        .speaker-btn:hover { color: #818cf8; }
     </style>
 </head>
 <body class="p-5 max-w-md mx-auto">
-    <div class="text-center mb-8">
-        <div class="text-5xl mb-2">🐼</div>
-        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">HanjaPass</h1>
-        <p class="text-gray-400 text-xs mt-1">韩国人的中文速成专家</p>
-    </div>
-
-    <div class="flex justify-center gap-3 mb-8">
-        <button id="biz-btn" onclick="showMode('biz')" class="active-btn px-5 py-2 rounded-full text-xs font-bold transition-all">职场生存</button>
-        <button id="hsk-btn" onclick="showMode('hsk')" class="px-5 py-2 rounded-full border border-indigo-500/50 text-xs font-bold transition-all">HSK 1 闯关</button>
-    </div>
-
-    <div id="biz-content" class="space-y-4">
-        <div class="glass-card p-4 rounded-2xl">
-            <div class="flex justify-between items-center mb-2">
-                <span class="text-indigo-400 text-xs font-bold">职场高频词</span>
-                <span class="text-[10px] text-gray-500">映射成功率 90%</span>
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-2">
+            <span class="text-4xl">🐼</span>
+            <div>
+                <h1 class="text-xl font-black tracking-tight">HanjaPass <span class="text-indigo-500 italic">BIZ</span></h1>
+                <p class="text-[10px] text-gray-400">한국인을 위한 무구조 치트키</p>
             </div>
-            <div class="text-2xl mb-1">准备 (준비)</div>
-            <div class="text-indigo-300 font-mono text-sm">[zhǔn bèi]</div>
-            <div class="text-yellow-400 font-bold mt-1 text-lg">준 비 (Jun-bi)</div>
         </div>
-        </div>
-
-    <div id="hsk-content" class="hidden space-y-4">
-        <div class="glass-card p-4 rounded-2xl border-l-4 border-yellow-500">
-            <div class="text-xs text-yellow-500 mb-2">HSK 1 基础问候</div>
-            <div class="text-2xl mb-1 text-white">你好</div>
-            <div class="text-gray-400 font-mono text-sm">[nǐ hǎo]</div>
-            <div class="text-cyan-400 font-bold mt-1 text-lg">니 하오 (Ni-hao)</div>
-        </div>
-        <div class="glass-card p-4 rounded-2xl border-l-4 border-yellow-500">
-            <div class="text-xs text-yellow-500 mb-2">HSK 1 场所</div>
-            <div class="text-2xl mb-1 text-white">学校 (학교)</div>
-            <div class="text-gray-400 font-mono text-sm">[xué xiào]</div>
-            <div class="text-cyan-400 font-bold mt-1 text-lg">쉐 샤오 (Xue-xiao)</div>
-        </div>
+        <select id="voiceSelect" class="bg-gray-800 text-[10px] p-1 rounded border border-gray-600 outline-none">
+            <option value="female">👩 Female Voice</option>
+            <option value="male">👨 Male Voice</option>
+        </select>
     </div>
 
-    <div class="mt-12 p-6 glass-card rounded-3xl text-center opacity-60">
-        <div class="text-3xl mb-2">🧸</div>
-        <div class="text-sm font-bold">幼儿/小学生模式</div>
-        <div class="text-[10px] text-gray-500 mt-1">Coming Soon... 敬请期待</div>
+    <div class="flex gap-2 mb-6">
+        <button onclick="showMode('biz')" id="bizBtn" class="flex-1 py-3 rounded-2xl text-xs font-bold btn-active">职场模式</button>
+        <button onclick="showMode('hsk')" id="hskBtn" class="flex-1 py-3 rounded-2xl text-xs font-bold bg-gray-700">HSK 1 闯关</button>
     </div>
+
+    <div id="wordList" class="grid grid-cols-1 gap-4">
+        </div>
 
     <script>
-        function showMode(mode) {
-            const bizContent = document.getElementById('biz-content');
-            const hskContent = document.getElementById('hsk-content');
-            const bizBtn = document.getElementById('biz-btn');
-            const hskBtn = document.getElementById('hsk-btn');
+        const words = {
+            biz: [
+                { cn: "确认", py: "quèrèn", hj: "확인 (Hwak-in)", kr: "췌 런", color: "border-l-cyan-400" },
+                { cn: "准备", py: "zhǔn bèi", hj: "준비 (Jun-bi)", kr: "준 베이", color: "border-l-indigo-400" }
+            ],
+            hsk: [
+                { cn: "你好", py: "nǐ hǎo", hj: "안녕 (An-nyeong)", kr: "니 하오", color: "border-l-green-400" },
+                { cn: "学校", py: "xué xiào", hj: "학교 (Hak-gyo)", kr: "쉐 샤오", color: "border-l-yellow-400" }
+            ]
+        };
 
-            if(mode === 'biz') {
-                bizContent.classList.remove('hidden');
-                hskContent.classList.add('hidden');
-                bizBtn.classList.add('active-btn');
-                hskBtn.classList.remove('active-btn');
-            } else {
-                bizContent.classList.add('hidden');
-                hskContent.classList.remove('hidden');
-                bizBtn.classList.remove('active-btn');
-                hskBtn.classList.add('active-btn');
-            }
+        function renderWords(mode) {
+            const container = document.getElementById('wordList');
+            container.innerHTML = '';
+            words[mode].forEach(item => {
+                container.innerHTML += `
+                    <div class="glass-card p-5 rounded-3xl border-l-4 ${item.color} flex justify-between items-center shadow-lg">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs text-gray-400 uppercase tracking-widest font-bold">Word</span>
+                                <div class="h-1 w-8 bg-gray-600 rounded-full">
+                                    <div class="h-1 bg-indigo-500 rounded-full w-3/4"></div>
+                                </div>
+                            </div>
+                            <h2 class="text-3xl font-bold mb-1">${item.cn}</h2>
+                            <p class="text-xs text-gray-400">${item.py} <span class="mx-1">|</span> ${item.hj}</p>
+                            <p class="text-lg text-indigo-400 font-bold mt-2 font-serif">${item.kr}</p>
+                        </div>
+                        <div class="speaker-btn p-3 bg-gray-800 rounded-full" onclick="speak('${item.cn}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                            </svg>
+                        </div>
+                    </div>
+                `;
+            });
         }
+
+        function speak(text) {
+            const msg = new SpeechSynthesisUtterance();
+            msg.text = text;
+            msg.lang = 'zh-CN';
+            const gender = document.getElementById('voiceSelect').value;
+            
+            // 获取所有语音，尝试匹配男女声
+            const voices = window.speechSynthesis.getVoices();
+            if (gender === 'male') {
+                msg.voice = voices.find(v => v.lang.includes('zh') && (v.name.includes('Xiaoxiao') === false)) || voices[0];
+            } else {
+                msg.voice = voices.find(v => v.lang.includes('zh') && v.name.includes('Xiaoxiao')) || voices[0];
+            }
+            window.speechSynthesis.speak(msg);
+        }
+
+        function showMode(mode) {
+            document.getElementById('bizBtn').className = `flex-1 py-3 rounded-2xl text-xs font-bold ${mode==='biz' ? 'btn-active' : 'bg-gray-700'}`;
+            document.getElementById('hskBtn').className = `flex-1 py-3 rounded-2xl text-xs font-bold ${mode==='hsk' ? 'btn-active' : 'bg-gray-700'}`;
+            renderWords(mode);
+        }
+
+        // 初始化加载
+        window.speechSynthesis.onvoiceschanged = () => renderWords('biz');
+        renderWords('biz');
     </script>
 </body>
 </html>
